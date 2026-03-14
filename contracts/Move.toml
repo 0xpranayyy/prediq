@@ -1,0 +1,10 @@
+[package]
+name = "prediction_market"
+version = "0.1.0"
+
+[addresses]
+prediction_market = "0x4ebe6f7473ba656f37243cc70ab808c8b2e02c3dcd429450ff17f387d10970df"
+admin = "0x4ebe6f7473ba656f37243cc70ab808c8b2e02c3dcd429450ff17f387d10970df"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "testnet" }
