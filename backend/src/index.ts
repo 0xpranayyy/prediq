@@ -7,6 +7,7 @@ import { initDB, healthCheck } from './db/sqlite';
 import { indexer } from './indexer';
 import marketsRouter from './routes/markets';
 import portfolioRouter from './routes/portfolio';
+import usersRouter from './routes/users';
 
 const PORT = parseInt(process.env.PORT || '3001');
 
@@ -31,6 +32,7 @@ async function main(): Promise<void> {
     // Routes
     app.use('/api/markets', marketsRouter);
     app.use('/api/portfolio', portfolioRouter);
+    app.use('/api/users', usersRouter);
 
     app.listen(PORT, () => {
       console.log(`[API] Listening on http://localhost:${PORT}`);

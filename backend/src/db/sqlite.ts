@@ -21,6 +21,14 @@ export async function initDB(): Promise<void> {
 
   // Create tables
   await db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      wallet_address TEXT PRIMARY KEY,
+      username TEXT NOT NULL,
+      profile_image_url TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS markets (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       on_chain_id TEXT UNIQUE NOT NULL,
@@ -33,6 +41,8 @@ export async function initDB(): Promise<void> {
       outcome BOOLEAN DEFAULT FALSE,
       total_yes_bets TEXT DEFAULT '0',
       total_no_bets TEXT DEFAULT '0',
+      aptos_txn_hash TEXT,
+      shelby_cid TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -44,6 +54,8 @@ export async function initDB(): Promise<void> {
       amount TEXT NOT NULL,
       side BOOLEAN NOT NULL,
       claimed BOOLEAN DEFAULT FALSE,
+      aptos_txn_hash TEXT,
+      shelby_cid TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -56,6 +68,7 @@ export async function initDB(): Promise<void> {
 
     INSERT OR IGNORE INTO indexer_cursor (id) VALUES (1);
 
+    CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
     CREATE INDEX IF NOT EXISTS idx_markets_creator ON markets(creator);
     CREATE INDEX IF NOT EXISTS idx_markets_end_time ON markets(end_time);
     CREATE INDEX IF NOT EXISTS idx_markets_resolved ON markets(resolved);
@@ -63,6 +76,12 @@ export async function initDB(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_bets_market_id ON bets(market_id);
     CREATE INDEX IF NOT EXISTS idx_bets_claimed ON bets(claimed);
   `);
+
+    // Add missing columns if they don't exist (for existing databases)
+    await db.exec('ALTER TABLE markets ADD COLUMN aptos_txn_hash TEXT').catch(() => {}); // Ignore if column already exists
+    await db.exec('ALTER TABLE markets ADD COLUMN shelby_cid TEXT').catch(() => {}); // Ignore if column already exists
+    await db.exec('ALTER TABLE bets ADD COLUMN aptos_txn_hash TEXT').catch(() => {}); // Ignore if column already exists
+    await db.exec('ALTER TABLE bets ADD COLUMN shelby_cid TEXT').catch(() => {}); // Ignore if column already exists
 
   console.log('[DB] SQLite database initialized');
 }

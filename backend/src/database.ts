@@ -40,6 +40,14 @@ export interface Bet {
   updated_at: Date;
 }
 
+export interface User {
+  wallet_address: string;
+  username: string;
+  profile_image_url?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface UserPortfolio {
   total_invested: string;
   total_winnings: string;
@@ -51,6 +59,17 @@ export async function initializeDatabase(): Promise<void> {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+
+    // Create users table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        wallet_address VARCHAR(66) PRIMARY KEY,
+        username VARCHAR(50) NOT NULL,
+        profile_image_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
 
     // Create markets table
     await client.query(`
@@ -86,6 +105,7 @@ export async function initializeDatabase(): Promise<void> {
 
     // Create indexes
     await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
       CREATE INDEX IF NOT EXISTS idx_markets_creator ON markets(creator);
       CREATE INDEX IF NOT EXISTS idx_markets_end_time ON markets(end_time);
       CREATE INDEX IF NOT EXISTS idx_markets_resolved ON markets(resolved);
@@ -239,4 +259,38 @@ export async function getUserPortfolio(walletAddress: string): Promise<UserPortf
 
 export async function closePool(): Promise<void> {
   await pool.end();
+}
+
+// User profile functions
+export async function upsertUser(user: Omit<User, 'created_at' | 'updated_at'>): Promise<User> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(`
+      INSERT INTO users (wallet_address, username, profile_image_url)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (wallet_address) 
+      DO UPDATE SET
+        username = EXCLUDED.username,
+        profile_image_url = EXCLUDED.profile_image_url,
+        updated_at = CURRENT_TIMESTAMP
+      RETURNING *
+    `, [user.wallet_address, user.username, user.profile_image_url]);
+
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
+}
+
+export async function getUser(walletAddress: string): Promise<User | null> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(`
+      SELECT * FROM users WHERE wallet_address = $1
+    `, [walletAddress]);
+
+    return result.rows[0] || null;
+  } finally {
+    client.release();
+  }
 }

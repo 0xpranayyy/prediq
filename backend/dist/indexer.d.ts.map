@@ -1,0 +1,1 @@
+{"version":3,"file":"indexer.d.ts","sourceRoot":"","sources":["../src/indexer.ts"],"names":[],"mappings":"AAoCA,qBAAa,OAAO;IAClB,OAAO,CAAC,KAAK,CAAQ;IACrB,OAAO,CAAC,SAAS,CAAS;;IASpB,KAAK,IAAI,OAAO,CAAC,IAAI,CAAC;IAe5B,IAAI,IAAI,IAAI;YAKE,IAAI;YAuCJ,YAAY;YAYZ,mBAAmB;YAUnB,eAAe;YAoBf,oBAAoB;YASpB,mBAAmB;CASlC;AAMD,eAAO,MAAM,OAAO,SAAgB,CAAC"}

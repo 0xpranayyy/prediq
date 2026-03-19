@@ -10,8 +10,8 @@ router.get('/', async (req: Request, res: Response) => {
     const offset = parseInt(req.query.offset as string) || 0;
 
     const result = await query(
-      `SELECT on_chain_id as id, question, creator, yes_pool::text, no_pool::text,
-              end_time, resolved, outcome, total_yes_bets::text, total_no_bets::text,
+      `SELECT on_chain_id as id, question, creator, yes_pool, no_pool,
+              end_time, resolved, outcome, total_yes_bets, total_no_bets,
               aptos_txn_hash, shelby_cid, created_at, updated_at
        FROM markets ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
       [limit, offset]
@@ -29,8 +29,8 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const result = await query(
-      `SELECT on_chain_id as id, question, creator, yes_pool::text, no_pool::text,
-              end_time, resolved, outcome, total_yes_bets::text, total_no_bets::text,
+      `SELECT on_chain_id as id, question, creator, yes_pool, no_pool,
+              end_time, resolved, outcome, total_yes_bets, total_no_bets,
               aptos_txn_hash, shelby_cid, created_at, updated_at
        FROM markets WHERE on_chain_id = $1`,
       [id]

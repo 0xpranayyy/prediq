@@ -10,7 +10,7 @@ router.get('/:address', async (req: Request, res: Response) => {
 
     // Active bets (unclaimed)
     const activeBets = await query(
-      `SELECT b.id, b.bettor, b.market_id, b.amount::text, b.side, b.claimed,
+      `SELECT b.id, b.bettor, b.market_id, b.amount, b.side, b.claimed,
               b.aptos_txn_hash, b.shelby_cid, b.created_at, b.updated_at
        FROM bets b
        JOIN markets m ON m.on_chain_id = b.market_id
@@ -21,7 +21,7 @@ router.get('/:address', async (req: Request, res: Response) => {
 
     // Claimed bets
     const claimedBets = await query(
-      `SELECT b.id, b.bettor, b.market_id, b.amount::text, b.side, b.claimed,
+      `SELECT b.id, b.bettor, b.market_id, b.amount, b.side, b.claimed,
               b.aptos_txn_hash, b.shelby_cid, b.created_at, b.updated_at
        FROM bets b
        WHERE b.bettor = $1 AND b.claimed = TRUE
@@ -32,8 +32,8 @@ router.get('/:address', async (req: Request, res: Response) => {
     // Totals
     const totals = await query(
       `SELECT
-        COALESCE(SUM(amount), 0)::text as total_invested,
-        COALESCE(SUM(CASE WHEN claimed THEN amount ELSE 0 END), 0)::text as total_winnings
+        COALESCE(SUM(amount), 0) as total_invested,
+        COALESCE(SUM(CASE WHEN claimed THEN amount ELSE 0 END), 0) as total_winnings
        FROM bets WHERE bettor = $1`,
       [address]
     );
